@@ -213,6 +213,7 @@ pub fn is_retryable_error(code: u32) -> bool {
 }
 
 /// 判断错误码是否为不应重试的致命错误（如认证失败、配置错误）
+#[allow(dead_code)]
 pub fn is_fatal_error(code: u32) -> bool {
     matches!(
         code,
