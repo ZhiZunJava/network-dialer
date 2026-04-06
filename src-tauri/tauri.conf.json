@@ -36,11 +36,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "shortDescription": "网络拨号连接管理工具",
+    "longDescription": "网络拨号连接管理器是一款用于管理和快速切换网络拨号连接的桌面工具，支持多连接配置与一键拨号。",
     "windows": {
       "nsis": {
         "displayLanguageSelector": false,
         "languages": ["SimpChinese"],
-        "installMode": "currentUser"
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico"
       }
     }
   }
