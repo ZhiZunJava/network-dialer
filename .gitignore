@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Rust build
+src-tauri/target/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Tauri plugin store (user config)
+*.store
+
+# Logs
+*.log
+
+# Env
+.env
+.env.*
+
+# Analysis files (generated)
+PROJECT_ANALYSIS.md
+SEARCH_FINDINGS.md
+
+# Lock files (keep package-lock.json, ignore others)
+yarn.lock
+pnpm-lock.yaml

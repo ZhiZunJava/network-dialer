@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"Directory exists: $?\")",
+      "WebSearch",
+      "WebFetch(domain:v2.tauri.app)",
+      "WebFetch(domain:microsoft.github.io)",
+      "Bash(printf '%s\\\\n' 'import os' 'plan_path = os.path.join\\(\"C:\", os.sep, \"Users\", \"33088\", \".claude\", \"plans\", \"rustling-humming-papert-agent-adcbd27bb06fcc6a7.md\"\\)' 'print\\(f\"Current size: {os.path.getsize\\(plan_path\\)}\"\\)' 'with open\\(plan_path, \"r\", encoding=\"utf-8\"\\) as f:' '    content = f.read\\(\\)' 'print\\(content[:200]\\)')",
+      "Bash(python /tmp/check_plan.py)",
+      "Bash(python:*)",
+      "Bash(npm --version)",
+      "Bash(rustc --version)",
+      "Bash(cargo --version)",
+      "Bash(npm install:*)",
+      "Bash(npx tauri:*)",
+      "Bash(cargo check:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep -r \"RasEnumEntries\" target/debug/build/windows-*/out/)",
+      "Bash(cd /tmp)",
+      "Read(//tmp/**)",
+      "Bash(gh auth:*)"
+    ]
+  }
+}
