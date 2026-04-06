@@ -1,6 +1,7 @@
 use crate::ras::{dial, entries, error::RasError, status, types::*};
 use std::sync::Mutex;
-use tauri::{Emitter, State};
+use tauri::{Emitter, Manager, State};
+use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_store::StoreExt;
 use windows::Win32::NetworkManagement::Rras::HRASCONN;
 
@@ -365,4 +366,33 @@ pub fn refresh_status(
         message: "未连接".to_string(),
     });
     ConnectionState::Disconnected
+}
+
+/// 设置开机自启动
+#[tauri::command]
+pub fn set_auto_start(
+    app: tauri::AppHandle,
+    enabled: bool,
+) -> Result<(), String> {
+    let autostart_manager = app.autolaunch();
+    if enabled {
+        autostart_manager.enable().map_err(|e| format!("启用开机自启动失败: {}", e))?;
+    } else {
+        autostart_manager.disable().map_err(|e| format!("禁用开机自启动失败: {}", e))?;
+    }
+    let state = app.state::<AppState>();
+    state.add_log(
+        LogLevel::Info,
+        format!("开机自启动已{}", if enabled { "启用" } else { "禁用" }),
+    );
+    Ok(())
+}
+
+/// 获取开机自启动状态
+#[tauri::command]
+pub fn get_auto_start(
+    app: tauri::AppHandle,
+) -> Result<bool, String> {
+    let autostart_manager = app.autolaunch();
+    autostart_manager.is_enabled().map_err(|e| format!("查询开机自启动状态失败: {}", e))
 }

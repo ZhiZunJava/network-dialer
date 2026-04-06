@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Form,
@@ -14,6 +14,7 @@ import {
   Col,
   Typography,
 } from "antd";
+import { invoke } from "@tauri-apps/api/core";
 import type { ConnectionConfig, RasEntry } from "../types";
 
 const { Text } = Typography;
@@ -52,10 +53,27 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onRefreshEntries,
 }) => {
   const [form] = Form.useForm<ConnectionConfig>();
+  const [autoStart, setAutoStart] = useState(false);
 
   useEffect(() => {
     form.setFieldsValue(config);
   }, [config, form]);
+
+  useEffect(() => {
+    invoke<boolean>("get_auto_start")
+      .then(setAutoStart)
+      .catch(() => {});
+  }, []);
+
+  const handleAutoStartChange = async (checked: boolean) => {
+    try {
+      await invoke("set_auto_start", { enabled: checked });
+      setAutoStart(checked);
+      message.success(checked ? "已启用开机自启动" : "已关闭开机自启动");
+    } catch (e) {
+      message.error("设置开机自启动失败: " + String(e));
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -200,6 +218,30 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               justifyContent: "space-between",
               alignItems: "center",
               marginTop: 8,
+            }}
+          >
+            <div>
+              <Text style={{ fontSize: 13 }}>
+                <i className="ri-power-line" style={{ marginRight: 6 }} />
+                开机自启动
+              </Text>
+              <br />
+              <Text type="secondary" style={{ fontSize: 11, paddingLeft: 20 }}>
+                开机后自动启动程序
+              </Text>
+            </div>
+            <Switch
+              size="small"
+              checked={autoStart}
+              onChange={handleAutoStartChange}
+            />
+          </div>
+          <Divider style={{ margin: "10px 0" }} />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <div>
