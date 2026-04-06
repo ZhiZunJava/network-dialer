@@ -1,6 +1,6 @@
 [package]
 name = "network-line"
-version = "0.1.0"
+version = "1.0.0"
 description = "Windows网络拨号连接管理器"
 authors = ["you"]
 edition = "2021"
