@@ -10,8 +10,13 @@ import {
   message,
   Divider,
   Tooltip,
+  Row,
+  Col,
+  Typography,
 } from "antd";
 import type { ConnectionConfig, RasEntry } from "../types";
+
+const { Text } = Typography;
 
 interface SettingsPanelProps {
   config: ConnectionConfig;
@@ -20,6 +25,24 @@ interface SettingsPanelProps {
   onSave: (config: ConnectionConfig) => Promise<void>;
   onRefreshEntries: () => void;
 }
+
+const SectionTitle: React.FC<{
+  icon: string;
+  title: string;
+  subtitle?: string;
+}> = ({ icon, title, subtitle }) => (
+  <div style={{ marginBottom: 4 }}>
+    <Text strong style={{ fontSize: 13 }}>
+      <i className={icon} style={{ marginRight: 6, color: "#1677ff" }} />
+      {title}
+    </Text>
+    {subtitle && (
+      <Text type="secondary" style={{ fontSize: 11, marginLeft: 8 }}>
+        {subtitle}
+      </Text>
+    )}
+  </div>
+);
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
   config,
@@ -46,150 +69,169 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   };
 
   return (
-    <Card
-      title={
-        <span>
-          <i className="ri-settings-3-line" style={{ marginRight: 6 }} />
-          连接设置
-        </span>
-      }
+    <Form
+      form={form}
+      layout="vertical"
+      initialValues={config}
       size="small"
-      styles={{ body: { padding: "12px 16px" } }}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={config}
-        size="small"
-      >
-        <Form.Item
-          label={
-            <span>
-              <i className="ri-router-line" style={{ marginRight: 4 }} />
-              宽带连接
-            </span>
-          }
-          name="entry_name"
-          rules={[{ required: true, message: "请选择连接" }]}
-        >
-          <Select
-            placeholder="选择系统已配置的宽带连接"
-            options={entries.map((e) => ({ label: e.name, value: e.name }))}
-            dropdownRender={(menu) => (
-              <>
-                {menu}
-                <Divider style={{ margin: "4px 0" }} />
-                <div style={{ padding: "4px 8px", textAlign: "center" }}>
-                  <Button
-                    type="link"
-                    size="small"
-                    icon={<i className="ri-refresh-line" />}
-                    onClick={onRefreshEntries}
-                  >
-                    刷新列表
-                  </Button>
-                </div>
-              </>
-            )}
-          />
-        </Form.Item>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* 连接配置 */}
+        <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+          <SectionTitle icon="ri-router-line" title="连接配置" />
 
-        <Form.Item
-          label={
-            <span>
-              <i className="ri-user-line" style={{ marginRight: 4 }} />
-              用户名
-              <Tooltip title="留空则使用系统已保存的凭据">
-                <i
-                  className="ri-information-line"
-                  style={{ marginLeft: 4, color: "#999", cursor: "pointer" }}
-                />
-              </Tooltip>
-            </span>
-          }
-          name="username"
-        >
-          <Input placeholder="留空使用系统已保存的账号" />
-        </Form.Item>
-
-        <Form.Item
-          label={
-            <span>
-              <i className="ri-lock-line" style={{ marginRight: 4 }} />
-              密码
-              <Tooltip title="留空则使用系统已保存的凭据">
-                <i
-                  className="ri-information-line"
-                  style={{ marginLeft: 4, color: "#999", cursor: "pointer" }}
-                />
-              </Tooltip>
-            </span>
-          }
-          name="password"
-        >
-          <Input.Password placeholder="留空使用系统已保存的密码" />
-        </Form.Item>
-
-        <Divider style={{ margin: "8px 0 12px" }} />
-
-        <Form.Item
-          label={
-            <span>
-              <i className="ri-loop-right-line" style={{ marginRight: 4 }} />
-              自动连接
-            </span>
-          }
-          name="auto_connect"
-          valuePropName="checked"
-        >
-          <Switch checkedChildren="开" unCheckedChildren="关" />
-        </Form.Item>
-
-        <Form.Item label="重试间隔(秒)" name="retry_interval_secs">
-          <InputNumber min={1} max={300} style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item
-          label="最大重试次数"
-          name="max_retries"
-          extra="0 = 无限重试"
-        >
-          <InputNumber min={0} max={9999} style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item label="检查间隔(秒)" name="check_interval_secs">
-          <InputNumber min={1} max={60} style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Divider style={{ margin: "8px 0 12px" }} />
-
-        <Form.Item
-          label={
-            <span>
-              <i className="ri-window-line" style={{ marginRight: 4 }} />
-              关闭窗口时
-            </span>
-          }
-          name="close_to_tray"
-          valuePropName="checked"
-          extra="开启后点击关闭按钮将最小化到系统托盘，关闭则直接退出程序"
-        >
-          <Switch checkedChildren="最小化到托盘" unCheckedChildren="退出程序" />
-        </Form.Item>
-
-        <Form.Item style={{ marginBottom: 0 }}>
-          <Button
-            type="primary"
-            icon={<i className="ri-save-line" style={{ marginRight: 4 }} />}
-            onClick={handleSave}
-            loading={saving}
-            block
+          <Form.Item
+            label="宽带连接"
+            name="entry_name"
+            rules={[{ required: true, message: "请选择连接" }]}
+            style={{ marginBottom: 10, marginTop: 8 }}
           >
-            保存配置
-          </Button>
-        </Form.Item>
-      </Form>
-    </Card>
+            <Select
+              placeholder="选择系统已配置的宽带连接"
+              options={entries.map((e) => ({ label: e.name, value: e.name }))}
+              dropdownRender={(menu) => (
+                <>
+                  {menu}
+                  <Divider style={{ margin: "4px 0" }} />
+                  <div style={{ padding: "4px 8px", textAlign: "center" }}>
+                    <Button
+                      type="link"
+                      size="small"
+                      icon={<i className="ri-refresh-line" />}
+                      onClick={onRefreshEntries}
+                    >
+                      刷新列表
+                    </Button>
+                  </div>
+                </>
+              )}
+            />
+          </Form.Item>
+
+          <Row gutter={10}>
+            <Col span={12}>
+              <Form.Item
+                label={
+                  <span>
+                    用户名
+                    <Tooltip title="留空则使用系统已保存的凭据">
+                      <i
+                        className="ri-information-line"
+                        style={{ marginLeft: 4, color: "#bbb", cursor: "pointer", fontSize: 12 }}
+                      />
+                    </Tooltip>
+                  </span>
+                }
+                name="username"
+                style={{ marginBottom: 0 }}
+              >
+                <Input placeholder="留空用系统账号" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label={
+                  <span>
+                    密码
+                    <Tooltip title="留空则使用系统已保存的凭据">
+                      <i
+                        className="ri-information-line"
+                        style={{ marginLeft: 4, color: "#bbb", cursor: "pointer", fontSize: 12 }}
+                      />
+                    </Tooltip>
+                  </span>
+                }
+                name="password"
+                style={{ marginBottom: 0 }}
+              >
+                <Input.Password placeholder="留空用系统密码" />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* 自动重连 */}
+        <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <SectionTitle icon="ri-loop-right-line" title="自动重连" />
+            <Form.Item name="auto_connect" valuePropName="checked" noStyle>
+              <Switch size="small" checkedChildren="开" unCheckedChildren="关" />
+            </Form.Item>
+          </div>
+
+          <Row gutter={10}>
+            <Col span={8}>
+              <Form.Item
+                label={<Text type="secondary" style={{ fontSize: 11 }}>重试间隔(秒)</Text>}
+                name="retry_interval_secs"
+                style={{ marginBottom: 0 }}
+              >
+                <InputNumber min={1} max={300} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                label={<Text type="secondary" style={{ fontSize: 11 }}>最大重试</Text>}
+                name="max_retries"
+                style={{ marginBottom: 0 }}
+                tooltip="0 = 无限重试"
+              >
+                <InputNumber min={0} max={9999} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                label={<Text type="secondary" style={{ fontSize: 11 }}>检查间隔(秒)</Text>}
+                name="check_interval_secs"
+                style={{ marginBottom: 0 }}
+              >
+                <InputNumber min={1} max={60} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* 应用设置 */}
+        <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+          <SectionTitle icon="ri-settings-3-line" title="应用设置" />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: 8,
+            }}
+          >
+            <div>
+              <Text style={{ fontSize: 13 }}>
+                <i className="ri-window-line" style={{ marginRight: 6 }} />
+                关闭时最小化到托盘
+              </Text>
+              <br />
+              <Text type="secondary" style={{ fontSize: 11, paddingLeft: 20 }}>
+                关闭后程序将在系统托盘继续运行
+              </Text>
+            </div>
+            <Form.Item name="close_to_tray" valuePropName="checked" noStyle>
+              <Switch size="small" />
+            </Form.Item>
+          </div>
+        </Card>
+
+        {/* 保存按钮 */}
+        <Button
+          type="primary"
+          icon={<i className="ri-save-line" style={{ marginRight: 4 }} />}
+          onClick={handleSave}
+          loading={saving}
+          block
+          size="middle"
+          style={{ borderRadius: 8 }}
+        >
+          保存配置
+        </Button>
+      </div>
+    </Form>
   );
 };
 
