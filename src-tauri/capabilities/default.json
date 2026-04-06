@@ -7,6 +7,8 @@
     "core:default",
     "opener:default",
     "store:default",
-    "core:event:default"
+    "core:event:default",
+    "process:default",
+    "updater:default"
   ]
 }

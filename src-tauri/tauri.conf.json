@@ -26,8 +26,17 @@
       "csp": null
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUxNEY0NDlFRDY0REQ5QjUKUldTMTJVM1dua1JQVVg1QmtCcHgxUDNSbjlBM1VBTGZodVlvYUFaNnRpc21qRkVrMEwrc1NWQTIK",
+      "endpoints": [
+        "https://github.com/ZhiZunJava/network-dialer/releases/latest/download/latest.json"
+      ]
+    }
+  },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": "v1Compatible",
     "targets": ["nsis"],
     "icon": [
       "icons/32x32.png",

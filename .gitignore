@@ -28,6 +28,10 @@ Desktop.ini
 # Logs
 *.log
 
+# Tauri signing keys
+.tauri-signing-key
+.tauri-signing-key.pub
+
 # Env
 .env
 .env.*

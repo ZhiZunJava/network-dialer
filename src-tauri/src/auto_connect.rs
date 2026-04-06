@@ -1,4 +1,5 @@
 use crate::commands::AppState;
+use crate::network;
 use crate::ras::{dial, status, types::*};
 use tauri::{AppHandle, Emitter, Manager};
 
@@ -97,6 +98,52 @@ pub fn start_auto_connect(app: AppHandle) {
                     tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
                     continue;
                 }
+
+                // ===== 网络预检：避免无意义重试 =====
+
+                // 1) 检查物理链路（网线是否插入）
+                if !network::has_physical_link() {
+                    if current_state != ConnectionState::Error {
+                        state.add_log(
+                            LogLevel::Warning,
+                            "未检测到以太网链路（网线未连接？），暂停拨号".to_string(),
+                        );
+                    }
+                    {
+                        let mut s = state.connection_state.lock().unwrap();
+                        *s = ConnectionState::Error;
+                    }
+                    let _ = app_handle.emit("connection-status-changed", StatusPayload {
+                        state: ConnectionState::Error,
+                        message: "无网络链路，等待网线连接...".to_string(),
+                    });
+                    let wait = config.check_interval_secs.max(5);
+                    tokio::time::sleep(tokio::time::Duration::from_secs(wait)).await;
+                    continue;
+                }
+
+                // 2) 检查系统是否已有互联网连接（WiFi 等）
+                if network::has_internet_connectivity() {
+                    if current_state != ConnectionState::Connected {
+                        state.add_log(
+                            LogLevel::Info,
+                            "检测到系统已有互联网连接，跳过拨号".to_string(),
+                        );
+                    }
+                    {
+                        let mut s = state.connection_state.lock().unwrap();
+                        *s = ConnectionState::Connected;
+                    }
+                    let _ = app_handle.emit("connection-status-changed", StatusPayload {
+                        state: ConnectionState::Connected,
+                        message: "已通过其他方式联网".to_string(),
+                    });
+                    retry_count = 0;
+                    tokio::time::sleep(tokio::time::Duration::from_secs(config.check_interval_secs)).await;
+                    continue;
+                }
+
+                // ===== 预检通过，继续拨号流程 =====
 
                 // 检查是否超出最大重试次数（max_retries=0 表示无限重试）
                 if config.max_retries > 0 && retry_count >= config.max_retries {

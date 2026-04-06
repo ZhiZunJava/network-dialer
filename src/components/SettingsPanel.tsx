@@ -16,6 +16,7 @@ import {
 } from "antd";
 import { invoke } from "@tauri-apps/api/core";
 import type { ConnectionConfig, RasEntry } from "../types";
+import UpdateChecker from "./UpdateChecker";
 
 const { Text } = Typography;
 
@@ -259,6 +260,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </Form.Item>
           </div>
         </Card>
+
+        {/* 软件更新 */}
+        <UpdateChecker />
 
         {/* 保存按钮 */}
         <Button

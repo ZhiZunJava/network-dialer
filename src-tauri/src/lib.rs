@@ -1,5 +1,6 @@
 mod auto_connect;
 mod commands;
+mod network;
 mod ras;
 
 use commands::AppState;
@@ -14,6 +15,8 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(AppState::new())
         .setup(|app| {
             // 从磁盘加载持久化配置
