@@ -1,8 +1,9 @@
 use crate::ras::{dial, entries, error::RasError, status, types::*};
 use std::sync::Mutex;
 use tauri::{Emitter, Manager, State};
-use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_store::StoreExt;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use windows::Win32::NetworkManagement::Rras::HRASCONN;
 
 const STORE_PATH: &str = "config.json";
@@ -368,18 +369,56 @@ pub fn refresh_status(
     ConnectionState::Disconnected
 }
 
-/// 设置开机自启动
+const TASK_NAME: &str = "NetworkLineDialer";
+
+/// 设置开机自启动（通过 Windows 任务计划程序，支持管理员权限启动）
 #[tauri::command]
 pub fn set_auto_start(
     app: tauri::AppHandle,
     enabled: bool,
 ) -> Result<(), String> {
-    let autostart_manager = app.autolaunch();
     if enabled {
-        autostart_manager.enable().map_err(|e| format!("启用开机自启动失败: {}", e))?;
+        let exe_path = std::env::current_exe()
+            .map_err(|e| format!("获取程序路径失败: {}", e))?;
+        let exe_str = exe_path.display().to_string();
+
+        // 使用 schtasks 创建开机自启动任务，HIGHEST 表示以最高权限运行
+        let output = std::process::Command::new("schtasks")
+            .args([
+                "/Create",
+                "/TN", TASK_NAME,
+                "/TR", &format!("\"{}\"", exe_str),
+                "/SC", "ONLOGON",
+                "/RL", "HIGHEST",
+                "/F",       // 强制覆盖已有任务
+                "/DELAY", "0000:06",  // 延迟6秒启动，避免托盘未就绪
+            ])
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW
+            .output()
+            .map_err(|e| format!("执行 schtasks 失败: {}", e))?;
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            return Err(format!("创建自启动任务失败: {} {}", stdout, stderr));
+        }
     } else {
-        autostart_manager.disable().map_err(|e| format!("禁用开机自启动失败: {}", e))?;
+        let output = std::process::Command::new("schtasks")
+            .args(["/Delete", "/TN", TASK_NAME, "/F"])
+            .creation_flags(0x08000000)
+            .output()
+            .map_err(|e| format!("执行 schtasks 失败: {}", e))?;
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            // 如果任务不存在，也认为禁用成功
+            if !stderr.contains("ERROR: The system cannot find")
+                && !stderr.contains("错误: 系统找不到") {
+                return Err(format!("删除自启动任务失败: {}", stderr));
+            }
+        }
     }
+
     let state = app.state::<AppState>();
     state.add_log(
         LogLevel::Info,
@@ -388,11 +427,16 @@ pub fn set_auto_start(
     Ok(())
 }
 
-/// 获取开机自启动状态
+/// 获取开机自启动状态（查询任务计划程序中是否存在对应任务）
 #[tauri::command]
 pub fn get_auto_start(
-    app: tauri::AppHandle,
+    _app: tauri::AppHandle,
 ) -> Result<bool, String> {
-    let autostart_manager = app.autolaunch();
-    autostart_manager.is_enabled().map_err(|e| format!("查询开机自启动状态失败: {}", e))
+    let output = std::process::Command::new("schtasks")
+        .args(["/Query", "/TN", TASK_NAME])
+        .creation_flags(0x08000000)
+        .output()
+        .map_err(|e| format!("查询自启动状态失败: {}", e))?;
+
+    Ok(output.status.success())
 }
