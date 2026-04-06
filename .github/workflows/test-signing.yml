@@ -1,0 +1,54 @@
+name: Test Signing Key
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Verify Signing Key
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Tauri CLI
+        run: npm install @tauri-apps/cli
+
+      - name: Test key decode
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          echo "Key length: $($env:TAURI_SIGNING_PRIVATE_KEY.Length) chars"
+          echo "Password length: $($env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD.Length) chars"
+          # Create a dummy file to sign
+          echo "test" > test.txt
+          npx @tauri-apps/cli signer sign test.txt --private-key-path - 2>&1 || true
+        shell: pwsh
+
+      - name: Test sign with file
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          # Write key to temp file
+          $env:TAURI_SIGNING_PRIVATE_KEY | Out-File -FilePath signing-key.txt -NoNewline -Encoding ascii
+          echo "Key file size: $((Get-Item signing-key.txt).Length) bytes"
+          echo "First 50 chars: $($env:TAURI_SIGNING_PRIVATE_KEY.Substring(0, [Math]::Min(50, $env:TAURI_SIGNING_PRIVATE_KEY.Length)))..."
+          # Try to sign a dummy file
+          echo "test content" > dummy.txt
+          npx @tauri-apps/cli signer sign dummy.txt 2>&1
+          if (Test-Path "dummy.txt.sig") {
+            echo "SUCCESS: Signature file created!"
+            Get-Content dummy.txt.sig
+          } else {
+            echo "FAILED: No signature file created"
+            exit 1
+          }
+        shell: pwsh
