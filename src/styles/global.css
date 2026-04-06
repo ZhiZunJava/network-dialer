@@ -12,6 +12,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: #f7f8fa;
   overflow-x: hidden;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 ::-webkit-scrollbar {
