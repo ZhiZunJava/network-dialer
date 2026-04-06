@@ -36,6 +36,7 @@ Desktop.ini
 PROJECT_ANALYSIS.md
 SEARCH_FINDINGS.md
 
-# Lock files (keep package-lock.json, ignore others)
+# Lock files
+package-lock.json
 yarn.lock
 pnpm-lock.yaml

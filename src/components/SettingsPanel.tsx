@@ -222,7 +222,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           >
             <div>
               <Text style={{ fontSize: 13 }}>
-                <i className="ri-power-line" style={{ marginRight: 6 }} />
+                <i className="ri-restart-line" style={{ marginRight: 6 }} />
                 开机自启动
               </Text>
               <br />
