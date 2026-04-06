@@ -28,7 +28,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUxNEY0NDlFRDY0REQ5QjUKUldTMTJVM1dua1JQVVg1QmtCcHgxUDNSbjlBM1VBTGZodVlvYUFaNnRpc21qRkVrMEwrc1NWQTIK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY1QTA4MDA2QzA1MUU0Q0YKUldUUDVGSEFCb0NnWlJGMG5CWE9MSkVlemNBQ1N3SEJTYTJLbGF4ZnhLZ2VjZ3hlTCtlbDB4OEIK",
       "endpoints": [
         "https://github.com/ZhiZunJava/network-dialer/releases/latest/download/latest.json"
       ]
