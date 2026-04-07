@@ -3,15 +3,22 @@
 ; 通过钩子在安装后将快捷方式重命名为中文
 
 !macro NSIS_HOOK_POSTINSTALL
-  ; 将桌面快捷方式从英文改为中文
+  ; 升级兼容：清理旧版中文注册表项（旧版 productName 为中文时注册的）
+  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\网络拨号连接管理器"
+  DeleteRegKey SHCTX "Software\networkline\网络拨号连接管理器"
+
+  ; 先删除可能存在的旧版中文快捷方式（防止重复）
+  Delete "$DESKTOP\网络拨号连接管理器.lnk"
+  Delete "$SMPROGRAMS\网络拨号连接管理器.lnk"
+
+  ; 将新建的英文快捷方式重命名为中文
   IfFileExists "$DESKTOP\${PRODUCTNAME}.lnk" 0 +2
     Rename "$DESKTOP\${PRODUCTNAME}.lnk" "$DESKTOP\网络拨号连接管理器.lnk"
 
-  ; 将开始菜单快捷方式从英文改为中文
   IfFileExists "$SMPROGRAMS\${PRODUCTNAME}.lnk" 0 +2
     Rename "$SMPROGRAMS\${PRODUCTNAME}.lnk" "$SMPROGRAMS\网络拨号连接管理器.lnk"
 
-  ; 更新注册表中的显示名称为中文（控制面板卸载列表）
+  ; 更新注册表显示名为中文（控制面板卸载列表）
   WriteRegStr SHCTX "${UNINSTKEY}" "DisplayName" "网络拨号连接管理器"
 !macroend
 
